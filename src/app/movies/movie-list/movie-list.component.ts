@@ -1,3 +1,4 @@
+import { ThisReceiver } from '@angular/compiler';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -12,7 +13,7 @@ import { MovieService } from '../movie.service';
   styleUrls: ['./movie-list.component.css']
 })
 export class MovieListComponent implements OnInit {
-  movies: Movie[];
+  movies: Movie[] = [];
   subscription: Subscription;
 
   constructor(private movieService: MovieService,
@@ -21,17 +22,17 @@ export class MovieListComponent implements OnInit {
               private route: ActivatedRoute) { }
 
   ngOnInit() {
-    // this.subscription = this.movieService.moviesChanged
-    // .subscribe(
-    //   (movies: Movie[]) => {
-    //     debugger;
-    //     this.movies = movies;
-    //   }
-    // );
+    this.dataStore.fetchMovies()
+    this.movies = this.movieService.getMovies();
+    this.subToMovieChanged()
+  }
 
-  this.movies = this.movieService.getMovies();
-  debugger;
-  // console.log(this.movies);
+  subToMovieChanged() {
+    this.movieService.moviesChanged.subscribe(data => {
+      if (data && data.length) {
+        this.movies = data
+      }
+    })
   }
 
   onNewMovie() {
@@ -43,6 +44,8 @@ export class MovieListComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    // this.subscription.unsubscribe();
   }
 }
+
+// Adding movies requires the subscription to movies changed

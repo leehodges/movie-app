@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { LocalStorageService } from '../shared/local-storage.service';
 
 import { Movie } from './movie.model';
 
@@ -26,18 +27,24 @@ export class MovieService {
   // ];
   private movies: Movie[] = [];
 
-  constructor() {}
-
-
+  constructor(private storage: LocalStorageService) {}
 
   setMovies(movies: Movie[]) {
-    this.movies = movies;
-    this.moviesChanged.next(this.movies.slice());
+    this.movies = movies
+    console.table(movies)
+    // this.moviesChanged.next(this.movies.slice());
   }
 
   getMovies() {
-    debugger;
-    return this.movies.slice();
+    debugger
+    let movies
+    if (this.movies && this.movies.length) {
+      movies = this.movies.slice()
+    } else {
+      const storedMovies = this.storage.getItem('movies')
+      movies = storedMovies
+    }
+    return movies
   }
 
   getMovie(index: number) {
@@ -53,15 +60,38 @@ export class MovieService {
     this.moviesChanged.next(this.movies.slice());
   }
 
+  // First you need to make the api call, so you can update the Subject
   updateMovie(index: number, newMovie: Movie) {
-    this.movies[index] = newMovie;
-    this.moviesChanged.next(this.movies.slice());
+    let movies
+    if (this.movies && this.movies.length) {
+      movies = this.movies.slice()
+    } else {
+      const storedMovies = this.storage.getItem('movies')
+      movies = storedMovies
+    }
+    movies[index] = newMovie;
+    this.storage.setItem('movies', movies)
+    this.moviesChanged.next(movies.slice());
   }
 
+  // First you need to make the api call, so you can update the Subject
   addMovie(movie: Movie) {
-    this.movies.push(movie);
-    this.moviesChanged.next(this.movies.slice());
+    debugger
+    let movies
+    if (this.movies && this.movies.length) {
+      movies = this.movies.slice()
+    } else {
+      const storedMovies = this.storage.getItem('movies')
+      movies = storedMovies
+    }
+    movies.push(movie);
+    this.storage.setItem('movies', movies)
+    this.moviesChanged.next(movies.slice());
   }
 
   rateMovie(movie: Movie) {}
 }
+
+// The if statements above are checking to see if there is a movies array and if it has content. It checks that
+// and sets the movies variable to the copy of the array.
+// If there were to be nothing in the initial check it would pull the movies from the local storage.

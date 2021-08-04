@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
 
 import { MovieService } from '../movie.service';
@@ -17,6 +17,9 @@ public editMode = false;
 movieForm: FormGroup;
 currentRate = 8;
 
+  get movieControls() {
+    return (this.movieForm.get('movie') as FormArray).controls
+  }
 
 
   constructor(private route: ActivatedRoute,
@@ -34,18 +37,18 @@ currentRate = 8;
   }
 
   onSubmit() {
-    console.log(this.movieForm);
+    console.table(this.movieForm);
     if (this.editMode) {
       this.movieService.updateMovie(this.id, this.movieForm.value);
     } else {
-        const newMovie = new Movie(
-          this.movieForm.value['name'],
-          this.movieForm.value['description'],
-          this.movieForm.value['imagePath'],
-          this.movieForm.value['date'],
-        )
+        // const newMovie = new Movie(
+        //   this.movieForm.value['name'],
+        //   this.movieForm.value['description'],
+        //   this.movieForm.value['imagePath'],
+        //   this.movieForm.value['date'],
+        // )
 
-      this.movieService.addMovie(newMovie);
+      this.movieService.addMovie(this.movieForm.value);
     }
     this.onCancel();
   }
